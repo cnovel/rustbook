@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::io;
 
 fn convert_to_pig_latin(word: &str) -> String {
     let vowels = ['a', 'e', 'i', 'o', 'u'];
@@ -48,5 +49,64 @@ fn main() {
     }
 
     // 3
-    
+    struct CompanyCli {
+        data: HashMap<String, Vec<String>>,
+    }
+
+    impl CompanyCli {
+        fn add_to_department(&mut self, person: &str, department: &str) {
+            let v = self.data.get_mut(department);
+            if let Some(d) = v {
+                d.push(person.to_string());
+                return;
+            }
+            self.data.insert(department.to_string(), vec![person.to_string()]);
+        }
+
+        fn print_department(&self, department: &str) {
+            let d = self.data.get(department);
+            if let Some(v) = d {
+                println!("People in {department}: {v:#?}");
+                return;
+            }
+            println!("No one works in {department}!");
+        }
+
+        fn print_all(&self) {
+            let mut deps: Vec<&String> = self.data.keys().collect();
+            deps.sort();
+            for d in deps {
+                self.print_department(&d);
+            }
+        }
+
+        fn listen(&mut self) {
+            loop {
+                println!("Enter cmd (type Exit to quit):");
+                let mut cmd = String::new();
+                io::stdin()
+                    .read_line(&mut cmd)
+                    .expect("Failed to read line");
+                cmd = cmd.trim().to_string();
+                let words: Vec<&str> = cmd.split_whitespace().collect();
+                if words.len() == 0 {
+                    println!("Eror: cmd is empty.");
+                    continue;
+                }
+
+                let action = words[0];
+                match action {
+                    "Add" => self.add_to_department(words[1], words[3]),
+                    "Show" => self.print_department(words[1]),
+                    "List" => self.print_all(),
+                    "Exit" => break,
+                    _ => println!("Unknown cmd <{}>", cmd),
+                }
+            }
+        }
+    }
+    let mut c = CompanyCli {
+        data: HashMap::new(),
+    };
+    c.listen();
 }
